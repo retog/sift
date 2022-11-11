@@ -7,13 +7,13 @@
 import {
   Status,
   STATUS_TEXT,
-} from "https://deno.land/std@0.154.0/http/http_status.ts";
+} from "https://deno.land/std@0.163.0/http/http_status.ts";
 
 import {
   ConnInfo,
   serve as stdServe,
   ServeInit,
-} from "https://deno.land/std@0.154.0/http/server.ts";
+} from "https://deno.land/std@0.163.0/http/server.ts";
 
 import { inMemoryCache } from "https://deno.land/x/httpcache@0.1.2/in_memory.ts";
 
@@ -28,11 +28,11 @@ export * from "https://esm.sh/preact@10.10.6?target=deno";
 export {
   Status,
   STATUS_TEXT,
-} from "https://deno.land/std@0.154.0/http/http_status.ts";
+} from "https://deno.land/std@0.163.0/http/http_status.ts";
 
 export type PathParams = Record<string, string> | undefined;
 
-export type { ConnInfo } from "https://deno.land/std@0.154.0/http/server.ts";
+export type { ConnInfo } from "https://deno.land/std@0.163.0/http/server.ts";
 
 /** Note: we should aim to keep it the same as std handler. */
 export type Handler = (
