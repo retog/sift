@@ -220,7 +220,7 @@ async function createResponse(fileUrl: string, contentType: string): Promise<Res
     const body = new Deno.ReadableStreamR(file);
     return new Response(body, {
       headers: {
-        "Content-Type": contentType
+        "Content-Type": contentType ??  "application/octet-stream"
       },
     });
   } catch (error) {
