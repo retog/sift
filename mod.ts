@@ -115,10 +115,9 @@ async function handleRequest(
 
     // method path+params timeTaken status
     console.log(
-      `${request.method} ${pathname + search} ${
-        response.headers.has("x-function-cache-hit")
-          ? String.fromCodePoint(0x26a1)
-          : ""
+      `${request.method} ${pathname + search} ${response.headers.has("x-function-cache-hit")
+        ? String.fromCodePoint(0x26a1)
+        : ""
       }${Date.now() - startTime}ms ${response.status}`,
     );
 
@@ -193,9 +192,9 @@ export function serveStatic(
     }
 
     if (typeof response === "undefined") {
-      const body = await Deno.readFile(fileUrl);
-      response = new Response(body);
       const contentType = getContentType(String(lookup(filePath)));
+      response = await createResponse(fileUrl, contentType);
+
       if (contentType) {
         response.headers.set("content-type", contentType);
       }
@@ -204,12 +203,7 @@ export function serveStatic(
       }
 
       if (cache) {
-        // We don't want to cache if the resource size if greater than 10MB.
-        // The size is arbitrary choice.
-        const TEN_MB = 1024 * 1024 * 10;
-        if (Number(response.headers.get("content-length")) < TEN_MB) {
-          await globalCache.put(request, response);
-        }
+        // We don't want to cache as we don't know size 
       }
     }
 
@@ -219,6 +213,25 @@ export function serveStatic(
     return response;
   };
 }
+
+async function createResponse(fileUrl: string, contentType: string): Promise<Response> {
+  try {
+    const file = await Deno.open(fileUrl);
+    const body = new Deno.ReadableStreamR(file);
+    return new Response(body, {
+      headers: {
+        "Content-Type": contentType
+      },
+    });
+  } catch (error) {
+    if (error instanceof Deno.errors.NotFound) {
+      return new Response("File not found", { status: 404 });
+    } else {
+      return new Response("Internal Server Error", { status: 500 });
+    }
+  }
+}
+
 
 /** Converts an object literal to a JSON string and returns
  * a Response with `application/json` as the `content-type`.
