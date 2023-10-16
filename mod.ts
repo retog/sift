@@ -214,11 +214,25 @@ export function serveStatic(
   };
 }
 
-async function createResponse(fileUrl: string, contentType: string): Promise<Response> {
+async function createResponse(fileUrl: URL, contentType: string|undefined): Promise<Response> {
   try {
     const file = await Deno.open(fileUrl);
-    const body = new Deno.ReadableStreamR(file);
-    return new Response(body, {
+    const stream = new ReadableStream({
+      async pull(controller) {
+        const chunk = new Uint8Array(1024); // adjust chunk size as needed
+        const bytesRead = await file.read(chunk);
+        if (bytesRead !== null && bytesRead > 0) {
+          controller.enqueue(chunk.subarray(0, bytesRead));
+        } else {
+          file.close();
+          controller.close();
+        }
+      },
+      cancel() {
+        file.close();
+      },
+    });
+    return new Response(stream, {
       headers: {
         "Content-Type": contentType ??  "application/octet-stream"
       },
